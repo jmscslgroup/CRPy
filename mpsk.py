@@ -12,7 +12,8 @@ Date:8/2/19
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-class mpsk:
+class Mpsk:
+    
     def __init__(self, mod_number, snr_dB, carrier_frequency):
         self.mod_number = mod_number
         self.snr_dB = snr_dB
@@ -35,6 +36,8 @@ class mpsk:
         ref_i = []
         ref_q = []
         modulated_bits = []
+
+        
         for i in range(mod_number):
             ref_i.append(1/np.sqrt(2)*np.cos(((i))/mod_number*2*np.pi))
             ref_q.append(1/np.sqrt(2)*np.sin(((i))/mod_number*2*np.pi))
@@ -60,6 +63,7 @@ class mpsk:
                 ref_i[i] = 0.5
         ref = np.vectorize(complex)(ref_i, ref_q)
         reference_constellation = ref
+        
         for i in range(len(bit_array)):
             if mod_number == 2: #BPSK Modulation
                 if bit_array[i] == '0':
@@ -94,7 +98,7 @@ class mpsk:
                     modulated_bits.append(ref[7])
         self.reference_constellation = reference_constellation
         return modulated_bits
-
+        
     
     def digital2analog(self, mod):
         """
@@ -127,6 +131,15 @@ class mpsk:
         quadrature = np.reshape(np.imag(mod),(len(mod),1))*np.reshape(np.round(np.sin(2*np.pi*fc*t),3),(1,number_of_steps))
         signal = np.concatenate((inphase,quadrature),axis = 0)
         return signal
+
+
+
+
+
+
+
+
+
     
     def awgn(self, input_signal, rate=1.0):
         """
@@ -174,6 +187,8 @@ class mpsk:
         output_signal = input_signal + noise
 
         return output_signal
+
+    
     def rayleigh(self, input_signal):
         """
         Rayleigh Channel.
@@ -204,6 +219,7 @@ class mpsk:
                 hs = np.multiply(h, input_signal)
         r = self.awgn(hs, snr_dB)
         return r
+    
     def analog2digital(self, received_signal):
         """
         Get the received signal turned back into complex form.
@@ -229,6 +245,10 @@ class mpsk:
             imag.append(x)
         r = np.vectorize(complex)(real,imag)
         return r
+
+
+
+    
     def demodulate(self, received_bits):
         """
         Demodulation by Computing the Euclidean distance of each index in
@@ -241,7 +261,6 @@ class mpsk:
 
         output is an array of the bit with the closest value to the received bit.
         """
-
         reference_constellation = self.reference_constellation
         mod_number = self.mod_number
         m = len(received_bits)
@@ -345,6 +364,13 @@ class mpsk:
             inphase = np.reshape(np.real(mod),(len(mod),1))*np.reshape(np.cos(2*np.pi*self.carrier_frequency*t),(1,number_of_steps))
             quadrature = np.reshape(np.imag(mod),(len(mod),1))*np.reshape(np.sin(2*np.pi*self.carrier_frequency*t),(1,number_of_steps))
         
+
+
+
+
+
+
+
             plt.subplot(2,2,1)
             plt.title('Modulated Bandpass Signal (Real Part)')
             plt.plot(half_t,inphase.flatten())
@@ -376,11 +402,6 @@ class mpsk:
         return output_array
 
     def error_rate(self, noise = 'awgn'):
-        """
-        test the error rate for the channel that you generated with either awgn
-        or rayleigh. this method will load 50000 random bits of the modulation type and SnR that
-        you chose when you initialized the object and find the BER for it. This code only works for BPSK as of 8/2/19.
-        """
         test = np.random.rand(50000)
         ak = []
         for i in range(len(test)):
@@ -393,11 +414,9 @@ class mpsk:
         EbNodB = self.snr_dB
 
         if noise == 'rayleigh':
-            signal = mpsk(2,EbNodB,1000)
+            signal = Mpsk(2,EbNodB,1000)
         else:
-            signal = mpsk(2,EbNodB,1000)
-
-
+            signal = Mpsk(2,EbNodB,1000)
         modulated_bits = signal.modulate(ak)
 
         if noise == 'rayleigh':
@@ -406,8 +425,6 @@ class mpsk:
             bits_with_noise = signal.awgn(modulated_bits)
         
         demodulated_bits = signal.demodulate(bits_with_noise)
-
-        
         for i in range(len(demodulated_bits)):
                 if demodulated_bits[i] != ak[i]:
                         errors.append('1')

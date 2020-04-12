@@ -9,8 +9,9 @@ Date:8/2/19
 """
 import numpy as np
 import math
+from environment import Environment
 
-class agent:
+class Agent:
     def QLearning(epsilon, min_eps, episodes):
         """
         the observation is an array of 5 values - the amount of energy on each
@@ -21,22 +22,23 @@ class agent:
         be active at once, so its up to the Agent to select the channel that is below the
         threshold value (which indicates that no one's using it at the moment).
         """
-        env = environment(0.0004,0,9)
+        
+        env = Environment(-10,10)
 
         accuracy_list = []
         episode_times = []
         
-        channel_index = [0,1,2,3,4]
+        channel_index = [0,1,2,3]
         
         obs_space = []
 
         q = np.zeros((len(channel_index)))
         
         """
-        q is a 1*5 table of zeros. after every episode the table will be updated depending on the
-        result of the transmission. the first row of 5 represents the Q-value of each channel
+        q is a 2*4 table of zeros. after every episode the table will be updated depending on the
+        result of the transmission. the first row of 4 represents the Q-value of each channel
         when it is picked and its below the threshold value, and the second row represents  the
-        Q-value for each channel when its is pick and its above the threshold value. After
+        Q-value for each channel when its is picked and it's above the threshold value. After
         a large amount of episodes the Q-vlaues of each channel in the
         first row should be >>> the values in the second (a channel with a value higher than
         the threshold shouldn't be picked, because someone's transmitting on that channel.)
@@ -44,9 +46,8 @@ class agent:
         """
         reduction = (epsilon - min_eps)/episodes
         
-        #call the array of 5 values at 5 predetermined points (Still have to set up
-        #my envinronment to be able to do this). obs_space = sim.reset()
-        
+        #call the array of 4 values at 4 predetermined points
+
         #based on the channel_number given, check if the value at that array index
         #is over the threshold value for each episode.
 
@@ -61,7 +62,7 @@ class agent:
                 action = np.random.randint(0,4)
 
             
-            if obs_space[action] < env.threshold_value: #threshold_value still has to be determined
+            if obs_space[action] != env.ber1:
                 print("Correct Channel used! (Channel ", action+1,")")
                 reward = 1
                 q[action] += reward
@@ -99,17 +100,17 @@ class agent:
         """
 
         #initialize a counts array (count the number of times each action is called)
-        #and values (the value of each action). values is a 2*5 array like the Q table
+        #and values (the value of each action). values is a 2*4 array like the Q table
         #in QLearning() so that we can record the number of correct and incorrect decisions.
-        counts = [0,0,0,0,0]
-        values = [[0.0, 0.0, 0.0, 0.0, 0.0],[0.0, 0.0, 0.0, 0.0, 0.0]]
+        counts = [0,0,0,0]
+        values = [[0.0, 0.0, 0.0, 0.0],[0.0, 0.0, 0.0, 0.0]]
         obs_space = []
-        env = environment(0.0004,0,9)
+        env = environment(-10,10)
         accuracy_list = []
         episode_times = []
         
         #initalize the ucb table to keep track of the value for each action
-        ucb_values = [0.0, 0.0, 0.0, 0.0, 0.0]
+        ucb_values = [0.0, 0.0, 0.0, 0.0]
 
 
         for i in range(episodes):
